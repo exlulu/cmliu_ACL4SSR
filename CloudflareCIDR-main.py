@@ -45,7 +45,7 @@ os.makedirs("Clash", exist_ok=True)
 
 # 5. 将结果写入两个文件
 with open('Clash/CloudflareCIDR.list', 'w') as clash_file, \
-     open('CloudflareCIDR.txt', 'w') as cidr_file:
+     open('cfcidr.txt', 'w') as cidr_file:
   cidr_file.write("payload:\n")
   for ip in ip_addresses:
     if ipv4_regex.match(ip):
