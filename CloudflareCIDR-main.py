@@ -51,7 +51,7 @@ with open('Clash/CloudflareCIDR.list', 'w') as clash_file, \
     if ipv4_regex.match(ip):
       clash_file.write(f"IP-CIDR,{ip},no-resolve\n")
       # 修改：在除了第一行之后的每一行最前面添加 - 并用单引号包住内容
-      cidr_file.write(f"- '{ip}'\n")
+      cidr_file.write(f"  - '{ip}'\n")
     else:
       clash_file.write(f"{ip}\n")
 
