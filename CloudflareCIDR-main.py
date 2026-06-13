@@ -33,6 +33,8 @@ ipv4_regex = re.compile(r'^(\d{1,3}\.){3}\d{1,3}(/\d{1,2})$')
 # 将结果写入两个文件
 with open('Clash/CloudflareCIDR.list', 'w') as clash_file, \
      open('CloudflareCIDR.txt', 'w') as cidr_file:
+  # 在 CloudflareCIDR.txt 的第一行写入 payload: 并换行
+  cidr_file.write("payload:\n")
   for ip in ip_addresses:
     # 检查IP是否符合IPv4/子网掩码格式
     if ipv4_regex.match(ip):
