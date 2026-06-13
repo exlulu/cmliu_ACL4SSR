@@ -6,7 +6,7 @@ import requests
 import re
 
 # 1. 明确下载地址（直接保存为固定的临时名字，不影响解压内容）
-url = "https://github.com"
+url = "https://github.com/ipverse/asn-ip/archive/refs/heads/master.zip"
 r = requests.get(url)
 temp_zip = "downloaded_temp.zip"
 with open(temp_zip, "wb") as code:
@@ -15,8 +15,8 @@ with open(temp_zip, "wb") as code:
 # 2. 解压zip文件，并动态捕获解压出来的真实文件夹名称
 with zipfile.ZipFile(temp_zip, 'r') as zip_ref:
   # 压缩包内文件的第一个路径，其第一级目录就是解压后的真实根目录
-  first_item = zip_ref.namelist()
-  extracted_dir = first_item[0].split('/')[0]
+  first_item = zip_ref.namelist()[0]
+  extracted_dir = first_item.split('/')[0]
   zip_ref.extractall(".")
 
 print(f"系统检测到实际解压出的文件夹名称为: {extracted_dir}")
@@ -46,10 +46,7 @@ os.makedirs("Clash", exist_ok=True)
 # 5. 将结果写入两个文件
 with open('Clash/CloudflareCIDR.list', 'w') as clash_file, \
      open('CloudflareCIDR.txt', 'w') as cidr_file:
-  
-  # 第一行写入 payload:
   cidr_file.write("payload:\n")
-  
   for ip in ip_addresses:
     if ipv4_regex.match(ip):
       clash_file.write(f"IP-CIDR,{ip},no-resolve\n")
