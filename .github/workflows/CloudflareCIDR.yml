@@ -2,7 +2,7 @@ name: 更新 Clash/CloudflareCIDR.list
 
 on:
   schedule:
-    - cron: '0 1 */5 * *'
+    - cron: '0 1 * * *'
   workflow_dispatch:  # 允许手动触发
 
 jobs:
