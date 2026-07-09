@@ -16,7 +16,7 @@ jobs:
       with:
         python-version: '3.13'
 
-    - name: Download and Process Geosite GitHub with Dynamic Includes
+    - name: Download and Process Geosite GitHub with category_entertainment
       run: |
         python - << 'EOF'
         import urllib.request
@@ -27,7 +27,7 @@ jobs:
         full_domains = set()
         normal_domains = set()
         
-        # 使用队列管理需要下载合并的文件名（初始只有主文件 github）
+        # 使用队列管理需要下载合并的文件名（初始只有主文件 category-entertainment）
         files_to_download = ["category-entertainment"]
         downloaded_files = set()
 
@@ -115,8 +115,8 @@ jobs:
         git config --local user.name "github-actions[bot]"
         
         if [ -n "$(git status --porcelain entertainment.txt)" ]; then
-          git add github.txt
-          git commit -m "🤖 自动更新 GitHub 规则集(跨仓智能合并include并过滤@): $(date +'%Y-%m-%d %H:%M:%S')"
+          git add entertainment.txt
+          git commit -m "🤖 自动更新 娱乐分类规则集(跨仓智能合并include并过滤@): $(date +'%Y-%m-%d %H:%M:%S')"
           git push
         else
           echo "规则没有发生变化，跳过提交。"
