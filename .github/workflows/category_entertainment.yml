@@ -26,7 +26,7 @@ jobs:
         
         full_domains = set()
         normal_domains = set()
-        regex_rules = set()  # 新增：用于存放正则规则
+        regex_rules = set()  # 用于存放正则规则
         
         # 使用队列管理需要下载合并的文件名（初始改为 category-entertainment）
         files_to_download = ["category-entertainment"]
@@ -81,7 +81,7 @@ jobs:
                     if domain and '.' in domain:
                         full_domains.add(domain)
                 elif line.startswith('regexp:'):
-                    # 新增：提取正则规则，存入单独的集合
+                    # 提取正则规则，存入单独的集合
                     regex = line.replace('regexp:', '').strip()
                     if regex:
                         regex_rules.add(regex)
@@ -100,7 +100,7 @@ jobs:
         sorted_normal = sorted(list(normal_domains))
         sorted_regex = sorted(list(regex_rules))
 
-        # 5. 组装为 Clash payload 格式（普通域名规则）
+        # 5. 组装为 Clash payload 格式（普通域名规则，behavior: domain）
         payload_lines = ["payload:"]
         for d in sorted_full:
             payload_lines.append(f"  - '{d}'")
@@ -112,11 +112,15 @@ jobs:
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write('\n'.join(payload_lines) + '\n')
         
-        # 7. 新增：保存正则规则文件
-        regex_output_file = "entertainment-regex.txt"
+        # 7. 保存正则规则文件（behavior: classical，使用 DOMAIN-REGEX 关键字）
+        regex_output_file = "category-entertainment-regex.txt"
+        regex_lines = ["payload:"]
+        for r in sorted_regex:
+            # 格式：'DOMAIN-REGEX, <正则表达式>'
+            regex_lines.append(f"  - 'DOMAIN-REGEX, {r}'")
+
         with open(regex_output_file, 'w', encoding='utf-8') as f:
-            for r in sorted_regex:
-                f.write(f"  - REGEX, {r}, PROXY\n")
+            f.write('\n'.join(regex_lines) + '\n')
 
         print(f"🎉 转换合并完成！")
         print(f"成功合并的官方文件: {list(downloaded_files)}")
