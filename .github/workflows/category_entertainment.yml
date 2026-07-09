@@ -16,7 +16,7 @@ jobs:
       with:
         python-version: '3.13'
 
-    - name: Download and Process Geosite GitHub with category_entertainment
+    - name: Download and Process Geosite Category-Entertainment
       run: |
         python - << 'EOF'
         import urllib.request
@@ -26,8 +26,9 @@ jobs:
         
         full_domains = set()
         normal_domains = set()
+        regex_rules = set()  # 新增：用于存放正则规则
         
-        # 使用队列管理需要下载合并的文件名（初始只有主文件 category-entertainment）
+        # 使用队列管理需要下载合并的文件名（初始改为 category-entertainment）
         files_to_download = ["category-entertainment"]
         downloaded_files = set()
 
@@ -56,16 +57,14 @@ jobs:
             for line in lines:
                 # 核心修改：先去除行内注释（#及后面的内容），并去除#前面的空格
                 line = line.split('#')[0].rstrip()
-
                 # 再去除整行前后的空白字符
                 line = line.strip()
-
+                
                 # 1. 过滤空行
                 if not line:
                     continue
-
+                
                 # 2. 核心：处理 include: 嵌套引用
-                # 既然文件名是干净的，直接去掉前缀并 strip 即可
                 if line.startswith('include:'):
                     include_file = line.replace('include:', '').strip()
                     if include_file and include_file not in downloaded_files:
@@ -76,16 +75,20 @@ jobs:
                 if '@' in line:
                     continue
 
-                # 4. 区分精确匹配 (full:) 与普通域名通配符 (+.)
+                # 4. 区分精确匹配 (full:)、正则匹配 (regexp:) 与普通域名通配符
                 if line.startswith('full:'):
                     domain = line.replace('full:', '').strip()
                     if domain and '.' in domain:
                         full_domains.add(domain)
+                elif line.startswith('regexp:'):
+                    # 新增：提取正则规则，存入单独的集合
+                    regex = line.replace('regexp:', '').strip()
+                    if regex:
+                        regex_rules.add(regex)
                 else:
-                    # 处理 domain:, suffix:, regexp:, keyword: 等前缀
-                    for prefix in ['domain:', 'suffix:', 'regexp:', 'keyword:']:
+                    # 处理 domain:, suffix:, keyword: 等前缀
+                    for prefix in ['domain:', 'suffix:', 'keyword:']:
                         if line.startswith(prefix):
-                            # 去掉前缀，并清理首尾空格（确保是纯字符串，避免列表操作报错）
                             line = line.replace(prefix, '').strip()
                             break
                     domain = line.strip()
@@ -95,22 +98,29 @@ jobs:
         # 分别排序
         sorted_full = sorted(list(full_domains))
         sorted_normal = sorted(list(normal_domains))
+        sorted_regex = sorted(list(regex_rules))
 
-        # 5. 组装为 Clash payload 格式
+        # 5. 组装为 Clash payload 格式（普通域名规则）
         payload_lines = ["payload:"]
         for d in sorted_full:
             payload_lines.append(f"  - '{d}'")
         for d in sorted_normal:
             payload_lines.append(f"  - '+.{d}'")
 
-        # 6. 保存为你要的文件
+        # 6. 保存普通域名规则文件
         output_file = "entertainment.txt"
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write('\n'.join(payload_lines) + '\n')
-            
+        
+        # 7. 新增：保存正则规则文件
+        regex_output_file = "entertainment-regex.txt"
+        with open(regex_output_file, 'w', encoding='utf-8') as f:
+            for r in sorted_regex:
+                f.write(f"  - REGEX, {r}, PROXY\n")
+
         print(f"🎉 转换合并完成！")
         print(f"成功合并的官方文件: {list(downloaded_files)}")
-        print(f"统计：精确匹配 {len(sorted_full)} 条，通配匹配 {len(sorted_normal)} 条。")
+        print(f"统计：精确匹配 {len(sorted_full)} 条，通配匹配 {len(sorted_normal)} 条，正则规则 {len(sorted_regex)} 条。")
         EOF
 
     - name: Commit and Push changes
@@ -118,9 +128,10 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         
-        if [ -n "$(git status --porcelain entertainment.txt)" ]; then
-          git add entertainment.txt
-          git commit -m "🤖 自动更新 娱乐分类规则集(跨仓智能合并include并过滤@): $(date +'%Y-%m-%d %H:%M:%S')"
+        # 检查两个文件是否有变化
+        if [ -n "$(git status --porcelain entertainment.txt entertainment-regex.txt)" ]; then
+          git add entertainment.txt entertainment-regex.txt
+          git commit -m "🤖 自动更新 娱乐分类规则集(含正则提取): $(date +'%Y-%m-%d %H:%M:%S')"
           git push
         else
           echo "规则没有发生变化，跳过提交。"
