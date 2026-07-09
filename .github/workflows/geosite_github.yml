@@ -1,8 +1,9 @@
-name: Generate Clash Rule-Set geosite_github
+name: Generate Clash Rule-Set
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    # 每天北京时间早上 8:00 定时运行 (00:00 UTC)
+    - cron: '0 0 * * *'
   workflow_dispatch: # 允许手动触发
 
 jobs:
@@ -10,85 +11,100 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v6
-
-    - name: Set up Python
-      uses: actions/setup-python@v6
+    - uses: actions/checkout@v6
+    - uses: actions/setup-python@v6
       with:
-        python-version: '3.x'
+        python-version: '3.13'
 
-    - name: Download and Process Geosite github
+    - name: Download and Process Geosite GitHub with Dynamic Includes
       run: |
         python - << 'EOF'
         import urllib.request
-        import re
+        import os
 
-        # 1. 下载社区维护的最新 geosite:github 源码文本
-        url = "https://raw.githubusercontent.com/v2fly/domain-list-community/refs/heads/master/data/github"
-        print("正在下载 geosite:github 源码...")
+        # 锁定 V2Fly 官方的 data 目录基础 URL
+        BASE_URL = "https://github.com/v2fly/domain-list-community/tree/master/data"
         
-        try:
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req) as response:
-                content = response.read().decode('utf-8')
-        except Exception as e:
-            print(f"下载失败: {e}")
-            exit(1)
-
-        # 使用集合去重
         full_domains = set()
         normal_domains = set()
         
-        lines = content.splitlines()
+        # 使用队列管理需要下载合并的文件名（初始只有主文件 github）
+        files_to_download = ["github"]
+        downloaded_files = set()
 
-        for line in lines:
-            line = line.strip()
+        def fetch_and_parse(file_name):
+            url = f"{BASE_URL}{file_name}"
+            print(f"🌐 正在从 V2Fly 仓库下载子模块: geosite:{file_name} ...")
+            try:
+                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                with urllib.request.urlopen(req) as response:
+                    content = response.read().decode('utf-8')
+                return content.splitlines()
+            except Exception as e:
+                print(f"⚠️ 警告: 下载 {file_name} 失败，跳过。错误: {e}")
+                return []
+
+        # 动态循环队列
+        while files_to_download:
+            current_file = files_to_download.pop(0)
+            if current_file in downloaded_files:
+                continue
             
-            # 过滤空行、注释、include嵌套
-            if not line or line.startswith('#') or line.startswith('include:'):
-                continue
+            lines = fetch_and_parse(current_file)
+            downloaded_files.add(current_file)
 
-            # 【已修改】只要包含 @ 标记（如 @ads、@cn），直接整行丢弃，不加入规则集
-            if '@' in line:
-                continue
+            for line in lines:
+                line = line.strip()
+                
+                # 1. 过滤空行、纯注释
+                if not line or line.startswith('#'):
+                    continue
+                
+                # 2. 核心：如果发现 include:npmjs 或 include:github-copilot
+                # 自动提取出文件名并加入下载队列，去官方仓库下载它
+                if line.startswith('include:'):
+                    include_file = line.replace('include:', '').strip()
+                    if include_file not in downloaded_files:
+                        files_to_download.append(include_file)
+                    continue
 
-            # 判断是否为精确匹配 (full:)
-            if line.startswith('full:'):
-                domain = line.replace('full:', '').strip()
-                if domain and '.' in domain:
-                    full_domains.add(domain)
-            else:
-                # 清洗其他可能的前缀，视作普通域名/后缀处理
-                for prefix in ['domain:', 'suffix:', 'regexp:', 'keyword:']:
-                    if line.startswith(prefix):
-                        line = line.replace(prefix, '')
-                        break
-                domain = line.strip()
-                if domain and '.' in domain:
-                    normal_domains.add(domain)
+                # 3. 严格过滤带 @ 的整行
+                if '@' in line:
+                    continue
 
-        # 分别排序，保证输出顺序固定
+                # 4. 区分精确匹配 (full:) 与普通域名通配符 (+.)
+                if line.startswith('full:'):
+                    domain = line.replace('full:', '').strip()
+                    if domain and '.' in domain:
+                        full_domains.add(domain)
+                else:
+                    for prefix in ['domain:', 'suffix:', 'regexp:', 'keyword:']:
+                        if line.startswith(prefix):
+                            line = line.replace(prefix, '')
+                            break
+                    domain = line.strip()
+                    if domain and '.' in domain:
+                        normal_domains.add(domain)
+
+        # 分别排序
         sorted_full = sorted(list(full_domains))
         sorted_normal = sorted(list(normal_domains))
 
-        # 3. 组装为指定格式的 payload
+        # 5. 组装为 Clash payload 格式
         payload_lines = ["payload:"]
-        
-        # 写入精确匹配域名 (不加 +.)
         for d in sorted_full:
             payload_lines.append(f"  - '{d}'")
-            
-        # 写入普通域名/通配域名 (加 +.)
         for d in sorted_normal:
             payload_lines.append(f"  - '+.{d}'")
 
-        # 4. 写入到 geosite_github.txt
-        output_file = "geosite_github.txt"
+        # 6. 保存为你要的文件
+        output_file = "github.txt"
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write('\n'.join(payload_lines) + '\n')
             
-        print(f"转换成功！精确匹配: {len(sorted_full)} 条，通配匹配: {len(sorted_normal)} 条。已保存。")
+        print(f"🎉 转换合并完成！")
+        print(f"成功合并的官方文件: {list(downloaded_files)}")
+        print(f"统计：精确匹配 {len(sorted_full)} 条，通配匹配 {len(sorted_normal)} 条。")
         EOF
 
     - name: Commit and Push changes
@@ -98,7 +114,7 @@ jobs:
         
         if [ -n "$(git status --porcelain geosite_github.txt)" ]; then
           git add geosite_github.txt
-          git commit -m "🤖 自动更新 GitHub 规则集: $(date +'%Y-%m-%d %H:%M:%S')"
+          git commit -m "🤖 自动更新 GitHub 规则集(跨仓智能合并include并过滤@): $(date +'%Y-%m-%d %H:%M:%S')"
           git push
         else
           echo "规则没有发生变化，跳过提交。"
