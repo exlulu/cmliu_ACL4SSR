@@ -16,7 +16,7 @@ jobs:
       with:
         python-version: '3.13'
 
-    - name: Download and Process Geosite GitHub with Dynamic Includes
+    - name: Download and Process Geosite GitHub with geosite_github
       run: |
         python - << 'EOF'
         import urllib.request
