@@ -117,7 +117,7 @@ jobs:
         regex_lines = ["payload:"]
         for r in sorted_regex:
             # 格式：'DOMAIN-REGEX, <正则表达式>'
-            regex_lines.append(f"  - DOMAIN-REGEX, {r}")
+            regex_lines.append(f"  - DOMAIN-REGEX,{r}")
 
         with open(regex_output_file, 'w', encoding='utf-8') as f:
             f.write('\n'.join(regex_lines) + '\n')
