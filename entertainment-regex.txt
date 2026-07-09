@@ -1,8 +1,0 @@
-  - REGEX, (^|\.)apiproxy-device-prod-nlb-.+\.amazonaws\.com$, PROXY
-  - REGEX, (^|\.)apiproxy-website-nlb-prod-.+\.amazonaws\.com$, PROXY
-  - REGEX, (^|\.)dualstack\.apiproxy-.+\.amazonaws\.com$, PROXY
-  - REGEX, (^|\.)dualstack\.ichnaea-web-.+\.amazonaws\.com$, PROXY
-  - REGEX, ^[0-9]+vod-adaptive\.akamaized\.net$, PROXY
-  - REGEX, ^epicgames-download\d\.akamaized\.net$, PROXY
-  - REGEX, ^ewcdn[0-9]+\.nowe\.com$, PROXY
-  - REGEX, ^hses[1-7]?\.akamaized\.net$, PROXY
