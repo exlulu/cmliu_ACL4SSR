@@ -84,7 +84,7 @@ jobs:
             payload_lines.append(f"  - '+.{d}'")
 
         # 4. 写入到 geosite_github.txt
-        output_file = geosite_github.txt"
+        output_file = "geosite_github.txt"
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write('\n'.join(payload_lines) + '\n')
             
