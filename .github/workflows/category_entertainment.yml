@@ -23,11 +23,11 @@ jobs:
 
         # 锁定 V2Fly 官方的 data 目录原始文件基础 URL
         BASE_URL = "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/"
-        
+
         full_domains = set()
         normal_domains = set()
         regex_rules = set()  # 用于存放正则规则
-        
+
         # 使用队列管理需要下载合并的文件名（初始改为 category-entertainment）
         files_to_download = ["category-entertainment"]
         downloaded_files = set()
@@ -50,7 +50,7 @@ jobs:
             current_file = files_to_download.pop(0)
             if current_file in downloaded_files:
                 continue
-            
+
             lines = fetch_and_parse(current_file)
             downloaded_files.add(current_file)
 
@@ -59,11 +59,11 @@ jobs:
                 line = line.split('#')[0].rstrip()
                 # 再去除整行前后的空白字符
                 line = line.strip()
-                
+
                 # 1. 过滤空行
                 if not line:
                     continue
-                
+
                 # 2. 核心：处理 include: 嵌套引用
                 if line.startswith('include:'):
                     include_file = line.replace('include:', '').strip()
@@ -111,13 +111,13 @@ jobs:
         output_file = "entertainment.txt"
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write('\n'.join(payload_lines) + '\n')
-        
+
         # 7. 保存正则规则文件（behavior: classical，使用 DOMAIN-REGEX 关键字）
         regex_output_file = "category-entertainment-regex.txt"
         regex_lines = ["payload:"]
         for r in sorted_regex:
             # 格式：'DOMAIN-REGEX, <正则表达式>'
-            regex_lines.append(f"  - 'DOMAIN-REGEX, {r}'")
+            regex_lines.append(f"  - DOMAIN-REGEX, {r}")
 
         with open(regex_output_file, 'w', encoding='utf-8') as f:
             f.write('\n'.join(regex_lines) + '\n')
@@ -131,7 +131,7 @@ jobs:
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        
+
         # 检查两个文件是否有变化
         if [ -n "$(git status --porcelain entertainment.txt entertainment-regex.txt)" ]; then
           git add entertainment.txt entertainment-regex.txt
@@ -139,4 +139,4 @@ jobs:
           git push
         else
           echo "规则没有发生变化，跳过提交。"
-        fi  
+        fi
