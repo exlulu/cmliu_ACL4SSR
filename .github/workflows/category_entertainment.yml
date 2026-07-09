@@ -113,7 +113,7 @@ jobs:
             f.write('\n'.join(payload_lines) + '\n')
 
         # 7. 保存正则规则文件（behavior: classical，使用 DOMAIN-REGEX 关键字）
-        regex_output_file = "category-entertainment-regex.txt"
+        regex_output_file = "entertainment-regex.txt"
         regex_lines = ["payload:"]
         for r in sorted_regex:
             # 格式：'DOMAIN-REGEX, <正则表达式>'
