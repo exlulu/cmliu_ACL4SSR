@@ -1,4 +1,4 @@
-name: Generate Clash Rule-Set
+name: Generate Clash Rule-Set geosite_github
 
 on:
   schedule:
