@@ -49,9 +49,9 @@ jobs:
             if not line or line.startswith('#') or line.startswith('include:'):
                 continue
 
-            # 剔除尾部策略标记 (如 @ads)
+            # 【已修改】只要包含 @ 标记（如 @ads、@cn），直接整行丢弃，不加入规则集
             if '@' in line:
-                line = line.split('@')[0].strip()
+                continue
 
             # 判断是否为精确匹配 (full:)
             if line.startswith('full:'):
