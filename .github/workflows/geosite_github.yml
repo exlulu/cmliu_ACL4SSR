@@ -1,0 +1,105 @@
+name: Generate Clash Rule-Set geosite_github
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
+
+    - name: Download and Process Geosite github
+      run: |
+        python - << 'EOF'
+        import urllib.request
+        import re
+
+        # 1. 下载社区维护的最新 geosite:github 源码文本
+        url = "https://raw.githubusercontent.com/v2fly/domain-list-community/refs/heads/master/data/github"
+        print("正在下载 geosite:github 源码...")
+        
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req) as response:
+                content = response.read().decode('utf-8')
+        except Exception as e:
+            print(f"下载失败: {e}")
+            exit(1)
+
+        # 使用集合去重
+        full_domains = set()
+        normal_domains = set()
+        
+        lines = content.splitlines()
+
+        for line in lines:
+            line = line.strip()
+            
+            # 过滤空行、注释、include嵌套
+            if not line or line.startswith('#') or line.startswith('include:'):
+                continue
+
+            # 剔除尾部策略标记 (如 @ads)
+            if '@' in line:
+                line = line.split('@')[0].strip()
+
+            # 判断是否为精确匹配 (full:)
+            if line.startswith('full:'):
+                domain = line.replace('full:', '').strip()
+                if domain and '.' in domain:
+                    full_domains.add(domain)
+            else:
+                # 清洗其他可能的前缀，视作普通域名/后缀处理
+                for prefix in ['domain:', 'suffix:', 'regexp:', 'keyword:']:
+                    if line.startswith(prefix):
+                        line = line.replace(prefix, '')
+                        break
+                domain = line.strip()
+                if domain and '.' in domain:
+                    normal_domains.add(domain)
+
+        # 分别排序，保证输出顺序固定
+        sorted_full = sorted(list(full_domains))
+        sorted_normal = sorted(list(normal_domains))
+
+        # 3. 组装为指定格式的 payload
+        payload_lines = ["payload:"]
+        
+        # 写入精确匹配域名 (不加 +.)
+        for d in sorted_full:
+            payload_lines.append(f"  - '{d}'")
+            
+        # 写入普通域名/通配域名 (加 +.)
+        for d in sorted_normal:
+            payload_lines.append(f"  - '+.{d}'")
+
+        # 4. 写入到 geosite_github.txt
+        output_file = geosite_github.txt"
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(payload_lines) + '\n')
+            
+        print(f"转换成功！精确匹配: {len(sorted_full)} 条，通配匹配: {len(sorted_normal)} 条。已保存。")
+        EOF
+
+    - name: Commit and Push changes
+      run: |
+        git config --local user.email "github-actions[bot]@://github.com"
+        git config --local user.name "github-actions[bot]"
+        
+        if [ -n "$(git status --porcelain rule-set.txt)" ]; then
+          git add geosite_github.txt
+          git commit -m "🤖 自动更新规则集(区分full/通配): $(date +'%Y-%m-%d %H:%M:%S')"
+          git push
+        else
+          echo "规则没有发生变化，跳过提交。"
+        fi
