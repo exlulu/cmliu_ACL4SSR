@@ -93,12 +93,12 @@ jobs:
 
     - name: Commit and Push changes
       run: |
-        git config --local user.email "github-actions[bot]@://github.com"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         
-        if [ -n "$(git status --porcelain rule-set.txt)" ]; then
+        if [ -n "$(git status --porcelain geosite_github.txt)" ]; then
           git add geosite_github.txt
-          git commit -m "🤖 自动更新规则集(区分full/通配): $(date +'%Y-%m-%d %H:%M:%S')"
+          git commit -m "🤖 自动更新 GitHub 规则集: $(date +'%Y-%m-%d %H:%M:%S')"
           git push
         else
           echo "规则没有发生变化，跳过提交。"
