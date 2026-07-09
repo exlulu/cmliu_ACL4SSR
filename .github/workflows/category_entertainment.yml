@@ -1,0 +1,123 @@
+name: Generate Clash Rule-Set category_entertainment
+
+on:
+  schedule:
+    # 每天北京时间早上 8:00 定时运行 (00:00 UTC)
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.13'
+
+    - name: Download and Process Geosite GitHub with Dynamic Includes
+      run: |
+        python - << 'EOF'
+        import urllib.request
+
+        # 锁定 V2Fly 官方的 data 目录原始文件基础 URL
+        BASE_URL = "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/"
+        
+        full_domains = set()
+        normal_domains = set()
+        
+        # 使用队列管理需要下载合并的文件名（初始只有主文件 github）
+        files_to_download = ["category-entertainment"]
+        downloaded_files = set()
+
+        def fetch_and_parse(file_name):
+            # 修正 URL 拼接，确保路径正确
+            url = f"{BASE_URL.rstrip('/')}/{file_name}"
+            print(f"🌐 正在从 V2Fly 仓库下载子模块: geosite:{file_name} ...")
+            try:
+                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                with urllib.request.urlopen(req) as response:
+                    content = response.read().decode('utf-8')
+                return content.splitlines()
+            except Exception as e:
+                print(f"⚠️ 警告: 下载 {file_name} 失败，跳过。错误: {e}")
+                return []
+
+        # 动态循环队列
+        while files_to_download:
+            current_file = files_to_download.pop(0)
+            if current_file in downloaded_files:
+                continue
+            
+            lines = fetch_and_parse(current_file)
+            downloaded_files.add(current_file)
+
+            for line in lines:
+                line = line.strip()
+                
+                # 1. 过滤空行、纯注释
+                if not line or line.startswith('#'):
+                    continue
+                
+                # 2. 核心：处理 include: 嵌套引用
+                # 既然文件名是干净的，直接去掉前缀并 strip 即可
+                if line.startswith('include:'):
+                    include_file = line.replace('include:', '').strip()
+                    if include_file and include_file not in downloaded_files:
+                        files_to_download.append(include_file)
+                    continue
+
+                # 3. 严格过滤带 @ 的整行（只过滤文件内容中带 @ 的域名行）
+                if '@' in line:
+                    continue
+
+                # 4. 区分精确匹配 (full:) 与普通域名通配符 (+.)
+                if line.startswith('full:'):
+                    domain = line.replace('full:', '').strip()
+                    if domain and '.' in domain:
+                        full_domains.add(domain)
+                else:
+                    # 处理 domain:, suffix:, regexp:, keyword: 等前缀
+                    for prefix in ['domain:', 'suffix:', 'regexp:', 'keyword:']:
+                        if line.startswith(prefix):
+                            # 去掉前缀，并清理首尾空格（确保是纯字符串，避免列表操作报错）
+                            line = line.replace(prefix, '').strip()
+                            break
+                    domain = line.strip()
+                    if domain and '.' in domain:
+                        normal_domains.add(domain)
+
+        # 分别排序
+        sorted_full = sorted(list(full_domains))
+        sorted_normal = sorted(list(normal_domains))
+
+        # 5. 组装为 Clash payload 格式
+        payload_lines = ["payload:"]
+        for d in sorted_full:
+            payload_lines.append(f"  - '{d}'")
+        for d in sorted_normal:
+            payload_lines.append(f"  - '+.{d}'")
+
+        # 6. 保存为你要的文件
+        output_file = "entertainment.txt"
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(payload_lines) + '\n')
+            
+        print(f"🎉 转换合并完成！")
+        print(f"成功合并的官方文件: {list(downloaded_files)}")
+        print(f"统计：精确匹配 {len(sorted_full)} 条，通配匹配 {len(sorted_normal)} 条。")
+        EOF
+
+    - name: Commit and Push changes
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        
+        if [ -n "$(git status --porcelain entertainment.txt)" ]; then
+          git add github.txt
+          git commit -m "🤖 自动更新 GitHub 规则集(跨仓智能合并include并过滤@): $(date +'%Y-%m-%d %H:%M:%S')"
+          git push
+        else
+          echo "规则没有发生变化，跳过提交。"
+        fi  
