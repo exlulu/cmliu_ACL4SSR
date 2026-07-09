@@ -54,12 +54,16 @@ jobs:
             downloaded_files.add(current_file)
 
             for line in lines:
+                # 核心修改：先去除行内注释（#及后面的内容），并去除#前面的空格
+                line = line.split('#')[0].rstrip()
+
+                # 再去除整行前后的空白字符
                 line = line.strip()
-                
-                # 1. 过滤空行、纯注释
-                if not line or line.startswith('#'):
+
+                # 1. 过滤空行
+                if not line:
                     continue
-                
+
                 # 2. 核心：处理 include: 嵌套引用
                 # 既然文件名是干净的，直接去掉前缀并 strip 即可
                 if line.startswith('include:'):
