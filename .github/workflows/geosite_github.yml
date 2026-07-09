@@ -112,8 +112,8 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         
-        if [ -n "$(git status --porcelain geosite_github.txt)" ]; then
-          git add geosite_github.txt
+        if [ -n "$(git status --porcelain github.txt)" ]; then
+          git add github.txt
           git commit -m "🤖 自动更新 GitHub 规则集(跨仓智能合并include并过滤@): $(date +'%Y-%m-%d %H:%M:%S')"
           git push
         else
