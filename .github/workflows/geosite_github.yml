@@ -1,4 +1,4 @@
-name: Generate Clash Rule-Set geosite_github
+name: Generate Clash Rule-Set
 
 on:
   schedule:
@@ -20,7 +20,6 @@ jobs:
       run: |
         python - << 'EOF'
         import urllib.request
-        import os
 
         # 锁定 V2Fly 官方的 data 目录原始文件基础 URL
         BASE_URL = "https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/"
@@ -61,15 +60,15 @@ jobs:
                 if not line or line.startswith('#'):
                     continue
                 
-                # 2. 核心：如果发现 include:npmjs 或 include:github-copilot
-                # 自动提取出文件名并加入下载队列，去官方仓库下载它
+                # 2. 核心：处理 include: 嵌套引用
+                # 既然文件名是干净的，直接去掉前缀并 strip 即可
                 if line.startswith('include:'):
                     include_file = line.replace('include:', '').strip()
-                    if include_file not in downloaded_files:
+                    if include_file and include_file not in downloaded_files:
                         files_to_download.append(include_file)
                     continue
 
-                # 3. 严格过滤带 @ 的整行
+                # 3. 严格过滤带 @ 的整行（只过滤文件内容中带 @ 的域名行）
                 if '@' in line:
                     continue
 
@@ -79,9 +78,11 @@ jobs:
                     if domain and '.' in domain:
                         full_domains.add(domain)
                 else:
+                    # 处理 domain:, suffix:, regexp:, keyword: 等前缀
                     for prefix in ['domain:', 'suffix:', 'regexp:', 'keyword:']:
                         if line.startswith(prefix):
-                            line = line.replace(prefix, '')
+                            # 去掉前缀，并清理首尾空格（确保是纯字符串，避免列表操作报错）
+                            line = line.replace(prefix, '').strip()
                             break
                     domain = line.strip()
                     if domain and '.' in domain:
