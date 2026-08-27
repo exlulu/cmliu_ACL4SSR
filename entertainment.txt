@@ -783,6 +783,7 @@ payload:
   - '+.gpstatic.com'
   - '+.gr-assets.com'
   - '+.greatgame.asia'
+  - '+.h264.io'
   - '+.hackyourconsole.com'
   - '+.haiwaikan.com'
   - '+.hayabusa.dev'
