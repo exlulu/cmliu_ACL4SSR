@@ -1319,6 +1319,7 @@ payload:
   - '+.playshowtv.com'
   - '+.playstation.com'
   - '+.playstation.net'
+  - '+.playstationnetwork.com'
   - '+.playvalorant.com'
   - '+.playwarcraft3.com'
   - '+.pluto.tv'
