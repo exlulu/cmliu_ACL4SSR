@@ -1,31 +1,3 @@
-# AS132892 (CLOUDFLARE)
-# Cloudflare Inc.
-#
-IP-CIDR,103.21.246.0/23,no-resolve
-IP-CIDR,104.22.240.0/20,no-resolve
-IP-CIDR,104.23.0.0/19,no-resolve
-IP-CIDR,141.101.88.0/23,no-resolve
-IP-CIDR,162.158.71.0/24,no-resolve
-IP-CIDR,172.69.24.0/21,no-resolve
-IP-CIDR,172.70.0.0/19,no-resolve
-IP-CIDR,172.70.64.0/21,no-resolve
-IP-CIDR,198.41.144.0/22,no-resolve
-IP-CIDR,198.41.148.0/24,no-resolve
-IP-CIDR,198.41.243.0/24,no-resolve
-IP-CIDR,198.41.245.0/24,no-resolve
-IP-CIDR,198.41.246.0/23,no-resolve
-IP-CIDR,198.41.248.0/22,no-resolve
-IP-CIDR,198.41.255.0/24,no-resolve
-# AS139242 (CSL-AS-AP)
-# Cloudflare Sydney LLC
-#
-# AS203898 (CLOUDFLARENET-UK)
-# Cloudflare Inc
-#
-IP-CIDR,185.122.0.0/24,no-resolve
-# AS394536 (CLOUDFLARENET-SFO)
-# Cloudflare Inc.
-#
 # AS13335 (CLOUDFLARENET)
 # Cloudflare Inc.
 #
@@ -387,6 +359,7 @@ IP-CIDR,104.22.249.0/24,no-resolve
 IP-CIDR,104.22.250.0/23,no-resolve
 IP-CIDR,104.22.252.0/23,no-resolve
 IP-CIDR,104.22.254.0/24,no-resolve
+IP-CIDR,104.23.96.0/24,no-resolve
 IP-CIDR,104.23.160.0/20,no-resolve
 IP-CIDR,104.23.176.0/23,no-resolve
 IP-CIDR,104.23.178.0/24,no-resolve
@@ -1133,6 +1106,28 @@ IP-CIDR,217.180.16.0/23,no-resolve
 IP-CIDR,217.216.171.0/24,no-resolve
 IP-CIDR,218.33.92.0/22,no-resolve
 IP-CIDR,222.167.32.0/22,no-resolve
+# AS132892 (CLOUDFLARE)
+# Cloudflare Inc.
+#
+IP-CIDR,103.21.246.0/23,no-resolve
+IP-CIDR,104.22.240.0/20,no-resolve
+IP-CIDR,104.23.0.0/19,no-resolve
+IP-CIDR,141.101.88.0/23,no-resolve
+IP-CIDR,162.158.71.0/24,no-resolve
+IP-CIDR,172.69.24.0/21,no-resolve
+IP-CIDR,172.70.0.0/19,no-resolve
+IP-CIDR,172.70.64.0/21,no-resolve
+IP-CIDR,198.41.144.0/22,no-resolve
+IP-CIDR,198.41.148.0/24,no-resolve
+IP-CIDR,198.41.243.0/24,no-resolve
+IP-CIDR,198.41.245.0/24,no-resolve
+IP-CIDR,198.41.246.0/23,no-resolve
+IP-CIDR,198.41.248.0/22,no-resolve
+IP-CIDR,198.41.255.0/24,no-resolve
+# AS203898 (CLOUDFLARENET-UK)
+# Cloudflare Inc
+#
+IP-CIDR,185.122.0.0/24,no-resolve
 # AS209242 (CLOUDFLARESPECTRUM)
 # Cloudflare London LLC
 #
@@ -1370,6 +1365,15 @@ IP-CIDR,216.198.53.0/24,no-resolve
 IP-CIDR,216.198.54.0/24,no-resolve
 IP-CIDR,216.205.52.0/24,no-resolve
 IP-CIDR,223.27.176.0/23,no-resolve
+# AS394536 (CLOUDFLARENET-SFO)
+# Cloudflare Inc.
+#
+# AS139242 (CSL-AS-AP)
+# Cloudflare Sydney LLC
+#
+# AS149648 (IRINN-AWSPL-AS-IN)
+# ARJUN WIRELESS SOLUTIONS PRIVATE LIMITED
+#
 # AS202623 (CLOUDFLARENET-CORE)
 # Cloudflare Inc
 #
@@ -1384,6 +1388,3 @@ IP-CIDR,198.41.143.0/24,no-resolve
 IP-CIDR,198.41.150.0/24,no-resolve
 IP-CIDR,198.41.245.0/24,no-resolve
 IP-CIDR,198.41.252.0/23,no-resolve
-# AS149648 (IRINN-AWSPL-AS-IN)
-# ARJUN WIRELESS SOLUTIONS PRIVATE LIMITED
-#
