@@ -290,6 +290,7 @@ payload:
   - '+.amcn.com'
   - '+.amcnetworks.com'
   - '+.amcplus.com'
+  - '+.amdgaming.com'
   - '+.ameba.jp'
   - '+.amebame.com'
   - '+.amebaownd.com'
