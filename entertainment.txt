@@ -1603,6 +1603,7 @@ payload:
   - '+.steamgames.com'
   - '+.steaminventoryhelper.com'
   - '+.steamos.cloud'
+  - '+.steampeek.hu'
   - '+.steampowered.com'
   - '+.steamserver.net'
   - '+.steamstatic.com'
