@@ -1207,6 +1207,7 @@ IP-CIDR,185.176.159.0/24,no-resolve
 IP-CIDR,185.178.196.0/22,no-resolve
 IP-CIDR,185.189.26.0/24,no-resolve
 IP-CIDR,185.198.24.0/23,no-resolve
+IP-CIDR,185.218.87.0/24,no-resolve
 IP-CIDR,185.220.20.0/24,no-resolve
 IP-CIDR,185.229.206.0/24,no-resolve
 IP-CIDR,185.245.203.0/24,no-resolve
