@@ -997,6 +997,7 @@ IP-CIDR,172.69.64.0/21,no-resolve
 IP-CIDR,172.69.72.0/24,no-resolve
 IP-CIDR,172.69.74.0/23,no-resolve
 IP-CIDR,172.69.79.0/24,no-resolve
+IP-CIDR,172.69.80.0/24,no-resolve
 IP-CIDR,172.69.82.0/23,no-resolve
 IP-CIDR,172.69.86.0/23,no-resolve
 IP-CIDR,172.69.88.0/24,no-resolve
